@@ -270,13 +270,18 @@ def main():
 
     for i in range(len(images)-1):
         print "  Feature matching: image ", i
-        m = MAT(i,i+1,[images[i], images[i+1]], vector)
+        m = MAT(i, i+1, [images[i], images[i+1]], vector)
         mask.append(m.generate_mask(mark[i], i))
         m.find_match(0.3)
-        mask = m.match_missing(mask, max_frame=2, max_distance=5)
+    # if the max_frame is larger than 0, there will miss some frame in final txt
+        mask = m.match_missing(mask, max_frame=0, max_distance=5)
         vector[i+1] = m.mitosis_refine()
         m.new_id()
         vector[i+1] = m.return_vectors()
+    # In case we cannot write last image
+        if i == len(images)-2:
+            mask.append(m.generate_mask(mark[i+1], i+1, isfinal=True))
+
 
     # write gif image showing the final result
     def find_max_id(temp_vector):
